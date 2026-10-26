@@ -1,62 +1,169 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaCartShopping, FaLeaf, FaMagnifyingGlass, FaShieldHalved, FaTruckFast, FaUtensils } from "react-icons/fa6";
+import { MdTableRestaurant } from "react-icons/md";
+import useTableBooking from "../hooks/useTableBooking";
 
+/**
+ * Background slides. Only these images move; all text stays fixed.
+ * 👉 To use the hero photo from the design, save it as /public/images/hero-1.jpg
+ *    and replace the FIRST item with "/images/hero-1.jpg".
+ */
+const SLIDES = [
+    "https://i.ibb.co.com/KjTB1WT/slider33.jpg",
+    "https://i.ibb.co.com/mh8mC5L/slide11.jpg",
+    "https://i.ibb.co.com/0qs1h6t/slider22.jpg",
+];
 
+const AUTO_PLAY_MS = 5000;
+const SLIDE_MS = 1200;
+
+const features = [
+    { Icon: FaUtensils, title: "Delicious Food", sub: "Fresh & Quality Ingredients" },
+    { Icon: FaTruckFast, title: "Fast Delivery", sub: "To Your Doorstep" },
+    { Icon: MdTableRestaurant, title: "Book a Table", sub: "Dine In Experience" },
+    { Icon: FaShieldHalved, title: "Secure Payments", sub: "Safe & Easy" },
+];
 
 const Banner = () => {
+    const navigate = useNavigate();
+    const { handleBookings, processingOverlay } = useTableBooking();
+
+    const [query, setQuery] = useState("");
+
+    /* ---------- infinite auto-sliding background (clone of first slide at the end) ---------- */
+    const total = SLIDES.length;
+    const track = [...SLIDES, SLIDES[0]];
+    const [index, setIndex] = useState(0);
+    const [animate, setAnimate] = useState(true);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setAnimate(true);
+            setIndex((i) => (i >= total ? i : i + 1));
+        }, AUTO_PLAY_MS);
+        return () => clearInterval(timer);
+    }, [total]);
+
+    const handleTransitionEnd = (e) => {
+        if (e.target !== e.currentTarget) return;
+        // reached the clone → silently jump back to the real first slide
+        if (index === total) {
+            setAnimate(false);
+            setIndex(0);
+        }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const q = query.trim();
+        navigate(q ? `/all-foods?search=${encodeURIComponent(q)}` : "/all-foods");
+    };
+
     return (
-        <div className="carousel w-full min-h-screen">
-            {/* Slide 1 */}
-            <div id="slide1" className="carousel-item relative w-full bg-[url('https://i.ibb.co.com/KjTB1WT/slider33.jpg')] bg-no-repeat bg-cover bg-center bg-blend-overlay pt-[30vh] sm:pt-[35vh] md:pt-[40vh] lg:pt-[45vh]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                <div className="text-center mx-auto space-y-3 px-4 sm:px-6 md:px-12">
-                    <h1 className="font-bold text-4xl md:text-5xl lg:text-6xl text-white">Fresh Homemade Dishes</h1>
-                    <h4 className="font-semibold text-base md:text-lg lg:text-2xl text-gray-300/90 pb-4">Our chefs cook with fresh and high quality ingredients. <br className="hidden sm:block" />We serve foods with finest tastes.</h4>
-                    <Link to="/all-foods">
-                        <button className="bg-[rgba(63,0,231,0.85)] hover:bg-[rgba(63,0,231,0.98)] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition duration-300 shadow-[0_4px_6px_rgba(255,255,255,0.3),4px_0_6px_rgba(255,255,255,0.3),-4px_0_6px_rgba(255,255,255,0.3)] hover:shadow-[0_6px_12px_rgba(255,255,255,0.5),6px_0_12px_rgba(255,255,255,0.5),-6px_0_12px_rgba(255,255,255,0.5)]">
-                            Shop The Hottest Foods
-                        </button>
-                    </Link>
-                </div>
-                <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                    <a href="#slide3" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❮</a>
-                    <a href="#slide2" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❯</a>
-                </div>
-            </div>
-
-            {/* Slide 2 */}
-            <div id="slide2" className="carousel-item relative w-full bg-[url('https://i.ibb.co.com/mh8mC5L/slide11.jpg')] bg-no-repeat bg-cover bg-center bg-blend-overlay pt-[30vh] sm:pt-[35vh] md:pt-[40vh] lg:pt-[45vh]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                <div className="text-center mx-auto space-y-3 px-4 sm:px-6 md:px-12">
-                    <h1 className="font-bold text-4xl md:text-5xl lg:text-6xl text-white">Ingredients Grown on Our Farms</h1>
-                    <h4 className="font-semibold text-base md:text-lg lg:text-2xl text-gray-300/90 pb-4">Enjoy the food experience mostly from our farms, through <br className="hidden sm:block" />our kitchen, and to your fork.</h4>
-                    <Link to="/all-foods">
-                        <button className="bg-[rgba(63,0,231,0.85)] hover:bg-[rgba(63,0,231,0.98)] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition duration-300 shadow-[0_4px_6px_rgba(255,255,255,0.3),4px_0_6px_rgba(255,255,255,0.3),-4px_0_6px_rgba(255,255,255,0.3)] hover:shadow-[0_6px_12px_rgba(255,255,255,0.5),6px_0_12px_rgba(255,255,255,0.5),-6px_0_12px_rgba(255,255,255,0.5)]">
-                            Shop The Hottest Foods
-                        </button>
-                    </Link>
-                </div>
-                <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                    <a href="#slide1" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❮</a>
-                    <a href="#slide3" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❯</a>
+        <section className="relative isolate flex min-h-[640px] flex-col overflow-hidden bg-black text-white lg:min-h-[700px]">
+            {/* ---------- moving background ---------- */}
+            <div className="absolute inset-0 -z-20 overflow-hidden" aria-hidden="true">
+                <div
+                    className="flex h-full"
+                    style={{
+                        width: `${track.length * 100}%`,
+                        transform: `translateX(-${(index * 100) / track.length}%)`,
+                        transition: animate ? `transform ${SLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)` : "none",
+                    }}
+                    onTransitionEnd={handleTransitionEnd}
+                >
+                    {track.map((src, i) => (
+                        <div
+                            key={i}
+                            className="h-full bg-cover bg-center"
+                            style={{ width: `${100 / track.length}%`, backgroundImage: `url(${src})` }}
+                        />
+                    ))}
                 </div>
             </div>
 
-            {/* Slide 3 */}
-            <div id="slide3" className="carousel-item relative w-full bg-[url('https://i.ibb.co.com/0qs1h6t/slider22.jpg')] bg-no-repeat bg-cover bg-center bg-blend-overlay pt-[30vh] sm:pt-[35vh] md:pt-[40vh] lg:pt-[45vh]" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                <div className="text-center mx-auto space-y-3 px-4 sm:px-6 md:px-12">
-                    <h1 className="font-bold text-4xl md:text-5xl lg:text-6xl text-white">We Take Care with Love</h1>
-                    <h4 className="font-semibold text-base md:text-lg lg:text-2xl text-gray-300/90 pb-4">We are passionate about making amazing recipes. <br className="hidden sm:block" />We serve foods simply full of the finest tastes.</h4>
-                    <Link to="/all-foods">
-                        <button className="bg-[rgba(63,0,231,0.85)] hover:bg-[rgba(63,0,231,0.98)] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition duration-300 shadow-[0_4px_6px_rgba(255,255,255,0.3),4px_0_6px_rgba(255,255,255,0.3),-4px_0_6px_rgba(255,255,255,0.3)] hover:shadow-[0_6px_12px_rgba(255,255,255,0.5),6px_0_12px_rgba(255,255,255,0.5),-6px_0_12px_rgba(255,255,255,0.5)]">
-                            Shop The Hottest Foods
-                        </button>
+            {/* ---------- readability overlays ---------- */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+
+            {/* decorative leaves */}
+            <FaLeaf className="pointer-events-none absolute left-0 top-6 -rotate-45 text-7xl text-secondary/70 lg:text-8xl" />
+            <FaLeaf className="pointer-events-none absolute bottom-24 left-0 rotate-12 text-6xl text-secondary/60 lg:text-7xl" />
+
+            {/* handwritten tag */}
+            <p className="pointer-events-none absolute right-24 top-24 z-10 hidden -rotate-6 font-script text-3xl leading-tight md:block lg:right-40 lg:text-4xl">
+                Fresh <br /> &amp; Tasty
+            </p>
+
+            {/* ---------- fixed content ---------- */}
+            <div className="relative z-10 mx-auto flex w-full max-w-screen-2xl flex-1 flex-col justify-center px-4 pb-8 pt-14 md:px-8 lg:px-16 lg:pt-20">
+                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/90 md:text-xs">
+                    Authentic Cuisine <span className="mx-2 text-primary">•</span> Fresh Ingredients
+                </p>
+
+                <h1 className="mt-4 max-w-2xl font-serif text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+                    Good Food <br /> Brings People Together
+                </h1>
+
+                <p className="mt-4 max-w-md text-sm text-white/85 md:text-base">
+                    From delicious meals to memorable moments, Elkano64 brings you the best of food and dining.
+                </p>
+
+                {/* search */}
+                <form
+                    onSubmit={handleSearch}
+                    className="mt-6 flex w-full max-w-xl items-center rounded-full bg-base-100 p-1 text-base-content shadow-lg ring-2 ring-primary/70"
+                >
+                    <FaUtensils className="mx-3 shrink-0 text-base-content/50" />
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search for your favorite dish..."
+                        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-base-content/50"
+                    />
+                    <button
+                        type="submit"
+                        className="btn btn-primary h-10 min-h-0 rounded-full px-5 text-sm sm:px-8"
+                    >
+                        <FaMagnifyingGlass className="sm:hidden" />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
+                </form>
+
+                {/* CTAs */}
+                <div className="mt-5 flex flex-wrap gap-3">
+                    <Link to="/all-foods" className="btn btn-primary rounded-full px-6 shadow-lg">
+                        <FaCartShopping /> Order Food
                     </Link>
-                </div>
-                <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                    <a href="#slide2" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❮</a>
-                    <a href="#slide1" className="btn btn-sm sm:btn-md lg:btn-lg btn-circle">❯</a>
+                    <button
+                        type="button"
+                        onClick={handleBookings}
+                        className="btn rounded-full border-white/70 bg-black/20 px-6 text-white backdrop-blur hover:border-white hover:bg-white/20"
+                    >
+                        <MdTableRestaurant className="text-lg" /> Book a Table
+                    </button>
                 </div>
             </div>
-        </div>
 
+            {/* ---------- feature strip ---------- */}
+            <div className="relative z-10 border-t border-white/10 bg-gradient-to-t from-black/70 to-black/30">
+                <div className="mx-auto grid max-w-screen-2xl grid-cols-2 gap-4 px-4 py-5 md:px-8 lg:grid-cols-4 lg:px-16">
+                    {features.map(({ Icon, title, sub }) => (
+                        <div key={title} className="flex items-center gap-3 lg:justify-center">
+                            <Icon className="shrink-0 text-2xl text-white lg:text-3xl" />
+                            <div className="leading-tight">
+                                <p className="text-xs font-semibold md:text-sm">{title}</p>
+                                <p className="text-[10px] text-white/70 md:text-xs">{sub}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {processingOverlay}
+        </section>
     );
 };
 

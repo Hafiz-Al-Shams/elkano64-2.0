@@ -1,7 +1,7 @@
-
+import { Link } from "react-router-dom";
+import { FaArrowRight, FaStar } from "react-icons/fa6";
 
 const Review = () => {
-
     const reviews = [
         {
             id: 1,
@@ -31,68 +31,43 @@ const Review = () => {
 
     return (
         <div>
-            <section className="bg-base-300 pt-7 md:pt-8 lg:pt-20 pb-10 md:pb-14 lg:pb-24">
-                <div className="max-w-6xl mx-auto px-6">
-                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-4 md:mb-6 lg:mb-8 underline">
-                        Customer ReViews
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {reviews.map((review) => (
-                            <div
-                                key={review.id}
-                                className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center"
-                            >
-                                <img
-                                    src={review.image}
-                                    alt={review.name}
-                                    className="w-20 h-20 rounded-full border-4 border-primary/80"
-                                />
-                                <h3 className="mt-4 text-xl font-semibold text-gray-800">
-                                    {review.name}
-                                </h3>
-                                <p className="mt-2 text-gray-600">{review.review}</p>
-                                <div className="mt-4 rating">
-                                    <input
-                                        type="radio"
-                                        name={`rating-${review.id}`}
-                                        className="mask mask-star bg-yellow-400"
-                                        disabled
-                                        checked={review.rating >= 1}
-                                    />
-                                    <input
-                                        type="radio"
-                                        name={`rating-${review.id}`}
-                                        className="mask mask-star bg-yellow-400"
-                                        disabled
-                                        checked={review.rating >= 2}
-                                    />
-                                    <input
-                                        type="radio"
-                                        name={`rating-${review.id}`}
-                                        className="mask mask-star bg-yellow-400"
-                                        disabled
-                                        checked={review.rating >= 3}
-                                    />
-                                    <input
-                                        type="radio"
-                                        name={`rating-${review.id}`}
-                                        className="mask mask-star bg-yellow-400"
-                                        disabled
-                                        checked={review.rating >= 4}
-                                    />
-                                    <input
-                                        type="radio"
-                                        name={`rating-${review.id}`}
-                                        className="mask mask-star bg-yellow-400"
-                                        disabled
-                                        checked={review.rating >= 5}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+            <div className="mb-5 flex items-center gap-4">
+                <h2 className="font-serif text-xl font-bold lg:text-2xl">Customer Reviews</h2>
+                <span className="hidden h-px w-16 bg-primary/60 sm:block" />
+                <Link
+                    to="/gallery"
+                    className="ml-auto flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                >
+                    View All <FaArrowRight className="text-[10px]" />
+                </Link>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+                {reviews.map((review) => (
+                    <div
+                        key={review.id}
+                        className="flex flex-col items-center rounded-xl border border-base-300 bg-base-100 p-4 text-center shadow-sm transition-shadow hover:shadow-lg"
+                    >
+                        <img
+                            src={review.image}
+                            alt={review.name}
+                            className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/70"
+                        />
+                        <h3 className="mt-3 font-serif text-sm font-semibold">{review.name}</h3>
+                        <p className="mt-2 text-[11px] leading-relaxed text-base-content/75">{review.review}</p>
+
+                        <div
+                            className="mt-auto flex gap-0.5 pt-3 text-sm"
+                            role="img"
+                            aria-label={`${review.rating} out of 5 stars`}
+                        >
+                            {[1, 2, 3, 4, 5].map((n) => (
+                                <FaStar key={n} className={n <= review.rating ? "text-warning" : "text-base-content/20"} />
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                ))}
+            </div>
         </div>
     );
 };

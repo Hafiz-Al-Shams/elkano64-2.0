@@ -1,20 +1,30 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
-import AuthContext from "../../context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
+import { FaBars, FaBell, FaChevronDown, FaMagnifyingGlass } from "react-icons/fa6";
+import AuthContext from "../../context/AuthContext/AuthContext";
 
+// Pages that really exist as routes
+const routeLinks = [
+    { label: "Home", to: "/", end: true },
+    { label: "All Foods", to: "/all-foods" },
+    { label: "Gallery", to: "/gallery" },
+];
 
+// Sections on the home page / footer (smooth-scrolled by Home.jsx)
+const hashLinks = [
+    { label: "About", to: "/#about" },
+    { label: "Contact", to: "/#contact" },
+];
+
+const closeDropdown = () => document.activeElement?.blur();
 
 const Navbar = () => {
-
     const { user, signOutUser } = useContext(AuthContext);
 
-    // console.log(user?.email);
-    // const navigate = useNavigate();
-
-    const [profilePhoto, setProfilePhoto] = useState('');
-    const [userName, setUserName] = useState('');
+    const [profilePhoto, setProfilePhoto] = useState("");
+    const [userName, setUserName] = useState("");
 
     useEffect(() => {
         if (user) {
@@ -23,136 +33,189 @@ const Navbar = () => {
         }
     }, [user]);
 
-
     const handleLogOut = () => {
+        closeDropdown();
         signOutUser()
             .then(() => {
-                // console.log('user signOut successful');
                 Swal.fire({
                     position: "center",
-                    icon: 'warning',
-                    title: 'Log out done!',
+                    icon: "warning",
+                    title: "Log out done!",
                     showConfirmButton: false,
-                    timer: 2000
-
-                    // confirmButtonText: 'ok'
+                    timer: 2000,
                 });
-                // setProfilePhoto('');
-                // setUserName('');
             })
-            .catch(error => console.log('ERROR', error.message))
-    }
-
-
-    const links = <>
-        <li><NavLink to="/">Home</NavLink></li>
-        <li><NavLink to="/all-foods">All Foods</NavLink></li>
-        <li><NavLink to="/gallery">Gallery</NavLink></li>
-    </>
-
-    const links2 = <>
-        <li><NavLink to={`/my-foods/${user?.email}`}>My Foods</NavLink></li>
-        <li><NavLink to="/add-food">Add food</NavLink></li>
-        <li><NavLink to="/my-orders">My Orders</NavLink></li>
-    </>
-
-
-    const [theme, setTheme] = useState("light");
-
-    const handleThemeChange = (newTheme) => {
-        setTheme(newTheme);
-        document.documentElement.setAttribute("data-theme", newTheme);
+            .catch((error) => console.log("ERROR", error.message));
     };
 
+    const desktopLinkClass = ({ isActive }) =>
+        `relative py-2 text-sm font-medium transition-colors hover:text-primary ${isActive
+            ? "text-primary after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:bg-primary"
+            : ""
+        }`;
+
+    const desktopLinks = (
+        <>
+            {routeLinks.map((l) => (
+                <li key={l.label}>
+                    <NavLink to={l.to} end={l.end} className={desktopLinkClass}>
+                        {l.label}
+                    </NavLink>
+                </li>
+            ))}
+            {hashLinks.map((l) => (
+                <li key={l.label}>
+                    <Link to={l.to} className="py-2 text-sm font-medium transition-colors hover:text-primary">
+                        {l.label}
+                    </Link>
+                </li>
+            ))}
+        </>
+    );
+
+    const mobileLinks = (
+        <>
+            {routeLinks.map((l) => (
+                <li key={l.label}>
+                    <NavLink to={l.to} end={l.end} onClick={closeDropdown}>
+                        {l.label}
+                    </NavLink>
+                </li>
+            ))}
+            {hashLinks.map((l) => (
+                <li key={l.label}>
+                    <Link to={l.to} onClick={closeDropdown}>
+                        {l.label}
+                    </Link>
+                </li>
+            ))}
+        </>
+    );
+
+    const accountLinks = (
+        <>
+            <li><NavLink to={`/my-foods/${user?.email}`} onClick={closeDropdown}>My Foods</NavLink></li>
+            <li><NavLink to="/add-food" onClick={closeDropdown}>Add food</NavLink></li>
+            <li><NavLink to="/my-orders" onClick={closeDropdown}>My Orders</NavLink></li>
+        </>
+    );
 
     return (
-        <>
-            <div className="sticky top-0 z-10 navbar font-medium md:py-0.5 lg:py-3 px-2.5 md:px-12 lg:px-24 bg-base-300 text-base-content">
-                <div className="navbar-start">
-                    <div className="dropdown">
-                        <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
-                            </svg>
+        <header className="sticky top-0 z-50 border-b border-base-300/60 bg-base-100/95 text-base-content shadow-sm backdrop-blur">
+            <div className="mx-auto flex h-16 lg:h-20 max-w-screen-2xl items-center justify-between gap-2 px-3 md:px-8 lg:px-16">
+                {/* ---------- Left : burger + logo ---------- */}
+                <div className="flex items-center gap-1">
+                    <div className="dropdown lg:hidden">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-sm px-2" aria-label="Open menu">
+                            <FaBars className="text-lg" />
                         </div>
                         <ul
                             tabIndex={0}
-                            className="menu menu-xs md:menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow space-y-2">
-                            {links}
+                            className="menu menu-sm dropdown-content z-[60] mt-3 w-52 space-y-1 rounded-box border border-base-300 bg-base-100 p-2 shadow-xl"
+                        >
+                            {mobileLinks}
                         </ul>
                     </div>
-                    <Link to="/" className="text-sm md:text-xl lg:text-2xl font-bold">Elkano64</Link>
+
+                    <Link to="/" className="leading-none">
+                        <span className="block font-serif text-xl font-bold md:text-2xl lg:text-[28px]">Elkano64</span>
+                        <span className="mt-1 hidden text-[10px] tracking-wide text-base-content/60 sm:block">
+                            Good Food <span className="mx-1 text-primary">•</span> Great Moments
+                        </span>
+                    </Link>
                 </div>
 
-                <div className="navbar-center hidden lg:flex">
-                    <ul className="menu menu-horizontal px-1 space-x-2 md:space-x-4 font-semibold">
-                        {links}
-                    </ul>
-                </div>
+                {/* ---------- Center : links ---------- */}
+                <nav className="hidden lg:block">
+                    <ul className="flex items-center gap-10">{desktopLinks}</ul>
+                </nav>
 
-                <div className="navbar-end space-x-4 md:space-x-6 lg:space-x-8">
+                {/* ---------- Right : search + auth area ---------- */}
+                <div className="flex items-center gap-1.5 md:gap-3">
+                    <Link
+                        to="/all-foods"
+                        aria-label="Search foods"
+                        className="btn btn-ghost btn-circle btn-sm md:btn-md"
+                    >
+                        <FaMagnifyingGlass className="text-base" />
+                    </Link>
 
-
-                    {/* theme change */}
-                    <div className="w-14 sm:w-16 md:w-20">
-                        <select
-                            className="w-full text-[9px] sm:text-[10px] md:text-xs px-1 py-0 lg:py-3 h-auto min-h-7 sm:min-h-8 border border-gray-300 rounded-md"
-                            value={theme}
-                            onChange={(e) => handleThemeChange(e.target.value)}
-                        >
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                            <option value="dim">Dim</option>
-                            <option value="luxury">Luxury</option>
-                        </select>
-                    </div>
-
-
-
-
-                    {
-                        user ?
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <div className="dropdown dropdown-end">
-                                    <div tabIndex={0} role="button" className="btn bg-transparent rounded-full p-0">
-                                        <img
-                                            className="w-7 min-w-7 sm:w-6 md:w-8 lg:w-10 rounded-full cursor-pointer"
-                                            src={profilePhoto}
-                                            alt="photo"
-                                        />
-                                    </div>
-
-                                    <ul
-                                        tabIndex={0}
-                                        className="menu menu-xs md:menu-sm lg:menu-md dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-40 md:w-52 p-3 md:p-4 shadow space-y-2">
-                                        {links2}
-                                    </ul>
+                    {user ? (
+                        /* ============ LOGGED IN ============ */
+                        <>
+                            <button
+                                type="button"
+                                aria-label="Notifications"
+                                className="btn btn-ghost btn-circle btn-sm md:btn-md"
+                            >
+                                <div className="indicator">
+                                    <FaBell className="text-base" />
+                                    <span className="badge badge-primary badge-xs indicator-item"></span>
                                 </div>
-                                <a onClick={handleLogOut} data-tooltip-id="my-tooltip"
-                                    data-tooltip-content={userName}
-                                    data-tooltip-place="bottom-start"
-                                    className="btn btn-xs md:btn-sm lg:btn-md bg-neutral-400/40 text-base-content text-[8px] md:text-xs lg:text-sm px-1.5 md:px-3 lg:px-4">
-                                    Log Out
-                                </a>
+                            </button>
+
+                            <div
+                                data-tooltip-id="my-tooltip"
+                                data-tooltip-content={userName}
+                                data-tooltip-place="bottom"
+                            >
+                                {profilePhoto ? (
+                                    <img
+                                        className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/60 md:h-10 md:w-10"
+                                        src={profilePhoto}
+                                        alt="photo"
+                                    />
+                                ) : (
+                                    <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-sm font-bold text-primary-content md:h-10 md:w-10">
+                                        {(userName || user?.email || "U").charAt(0).toUpperCase()}
+                                    </div>
+                                )}
                             </div>
-                            :
-                            <NavLink to="/signIn">
-                                <button className="btn btn-xs md:btn-sm lg:btn-md bg-neutral-400/40 text-base-content text-[9px] md:text-xs lg:text-sm px-2 md:px-3 lg:px-4">
-                                    Login
-                                </button>
+
+                            <div className="dropdown dropdown-end">
+                                <div
+                                    tabIndex={0}
+                                    role="button"
+                                    className="btn btn-sm md:btn-md gap-2 border-base-300 bg-base-100 px-2.5 text-xs font-medium md:px-4 md:text-sm"
+                                >
+                                    <span className="hidden sm:inline">My Account</span>
+                                    <FaChevronDown className="text-[10px]" />
+                                </div>
+                                <ul
+                                    tabIndex={0}
+                                    className="menu menu-sm dropdown-content z-[60] mt-3 w-52 space-y-1 rounded-box border border-base-300 bg-base-100 p-3 shadow-xl md:menu-md"
+                                >
+                                    {accountLinks}
+                                    <li className="mt-1 border-t border-base-300 pt-1">
+                                        <button onClick={handleLogOut} className="font-semibold text-primary">
+                                            Log Out
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </>
+                    ) : (
+                        /* ============ LOGGED OUT ============ */
+                        <>
+                            <NavLink
+                                to="/signIn"
+                                className="btn btn-outline btn-sm rounded-full border-base-content/30 px-4 text-xs md:btn-md md:px-7 md:text-sm"
+                            >
+                                Login
                             </NavLink>
-                    }
+                            <NavLink
+                                to="/register"
+                                className="btn btn-primary btn-sm rounded-full px-4 text-xs md:btn-md md:px-7 md:text-sm"
+                            >
+                                Sign Up
+                            </NavLink>
+                        </>
+                    )}
 
                     <Tooltip id="my-tooltip" />
                 </div>
             </div>
-
-        </>
+        </header>
     );
 };
 
