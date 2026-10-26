@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    font-family: "Sora", serif;
+}
+
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+  
+th {
+    background-color: #f4f4f4;
+    color: #333;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: large;
+}
+  
+.orders-table-row:nth-child(even) {
+    background-color: #f9f9f9;
+}
+  
+.orders-table-row:hover {
+    background-color: #f1f1f1;
+}
+  
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: large;
+    font-weight: 500;
+}
+
+.unique{
+    text-align: center;
+}
