@@ -2,8 +2,12 @@ import { useContext, useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import Swal from "sweetalert2";
-import { FaBars, FaBell, FaChevronDown, FaMagnifyingGlass } from "react-icons/fa6";
+import { FaBars, FaMagnifyingGlass } from "react-icons/fa6";
 import AuthContext from "../../context/AuthContext/AuthContext";
+import SearchModal from "../../components/SearchModal";
+import NotificationDropdown from "../../components/NotificationDropdown";
+import AccountDropdown from "../../components/AccountDropdown";
+import RouteLoader from "../../components/RouteLoader";
 
 // Pages that really exist as routes
 const routeLinks = [
@@ -25,6 +29,7 @@ const Navbar = () => {
 
     const [profilePhoto, setProfilePhoto] = useState("");
     const [userName, setUserName] = useState("");
+    const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -92,17 +97,9 @@ const Navbar = () => {
         </>
     );
 
-    const accountLinks = (
-        <>
-            <li><NavLink to={`/my-foods/${user?.email}`} onClick={closeDropdown}>My Foods</NavLink></li>
-            <li><NavLink to="/add-food" onClick={closeDropdown}>Add food</NavLink></li>
-            <li><NavLink to="/my-orders" onClick={closeDropdown}>My Orders</NavLink></li>
-        </>
-    );
-
     return (
         <header className="sticky top-0 z-50 border-b border-base-300/60 bg-base-100/95 text-base-content shadow-sm backdrop-blur">
-            <div className="mx-auto flex h-16 lg:h-20 max-w-screen-2xl items-center justify-between gap-2 px-3 md:px-8 lg:px-16">
+            <div className="mx-auto flex h-14 lg:h-16 max-w-screen-2xl items-center justify-between gap-2 px-3 md:px-8 lg:px-16">
                 {/* ---------- Left : burger + logo ---------- */}
                 <div className="flex items-center gap-1">
                     <div className="dropdown lg:hidden">
@@ -132,27 +129,19 @@ const Navbar = () => {
 
                 {/* ---------- Right : search + auth area ---------- */}
                 <div className="flex items-center gap-1.5 md:gap-3">
-                    <Link
-                        to="/all-foods"
+                    <button
+                        type="button"
+                        onClick={() => setSearchOpen(true)}
                         aria-label="Search foods"
                         className="btn btn-ghost btn-circle btn-sm md:btn-md"
                     >
                         <FaMagnifyingGlass className="text-base" />
-                    </Link>
+                    </button>
 
                     {user ? (
                         /* ============ LOGGED IN ============ */
                         <>
-                            <button
-                                type="button"
-                                aria-label="Notifications"
-                                className="btn btn-ghost btn-circle btn-sm md:btn-md"
-                            >
-                                <div className="indicator">
-                                    <FaBell className="text-base" />
-                                    <span className="badge badge-primary badge-xs indicator-item"></span>
-                                </div>
-                            </button>
+                            <NotificationDropdown />
 
                             <div
                                 data-tooltip-id="my-tooltip"
@@ -172,27 +161,7 @@ const Navbar = () => {
                                 )}
                             </div>
 
-                            <div className="dropdown dropdown-end">
-                                <div
-                                    tabIndex={0}
-                                    role="button"
-                                    className="btn btn-sm md:btn-md gap-2 border-base-300 bg-base-100 px-2.5 text-xs font-medium md:px-4 md:text-sm"
-                                >
-                                    <span className="hidden sm:inline">My Account</span>
-                                    <FaChevronDown className="text-[10px]" />
-                                </div>
-                                <ul
-                                    tabIndex={0}
-                                    className="menu menu-sm dropdown-content z-[60] mt-3 w-52 space-y-1 rounded-box border border-base-300 bg-base-100 p-3 shadow-xl md:menu-md"
-                                >
-                                    {accountLinks}
-                                    <li className="mt-1 border-t border-base-300 pt-1">
-                                        <button onClick={handleLogOut} className="font-semibold text-primary">
-                                            Log Out
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
+                            <AccountDropdown user={user} onLogOut={handleLogOut} />
                         </>
                     ) : (
                         /* ============ LOGGED OUT ============ */
@@ -215,6 +184,12 @@ const Navbar = () => {
                     <Tooltip id="my-tooltip" />
                 </div>
             </div>
+
+            {/* ---------- Search modal (opens from the search icon) ---------- */}
+            {searchOpen && <SearchModal onClose={() => setSearchOpen(false)} />}
+
+            {/* ---------- Page loading bar (shown while a page's data is loading) ---------- */}
+            <RouteLoader />
         </header>
     );
 };
