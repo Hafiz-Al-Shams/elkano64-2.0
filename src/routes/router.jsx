@@ -15,11 +15,21 @@ import MyOrders from "../pages/MyOrders/MyOrders";
 import Gallery from "../pages/Gallery/Gallery";
 
 
+// Shown only during the very first load while route loaders are fetching data
+const HydrateFallback = () => {
+    return (
+        <div className="flex min-h-screen items-center justify-center">
+            <span className="loading loading-spinner loading-lg"></span>
+        </div>
+    );
+};
+
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <MainLayout></MainLayout>,
+        HydrateFallback: HydrateFallback,
         children: [
             {
                 path: '/',
