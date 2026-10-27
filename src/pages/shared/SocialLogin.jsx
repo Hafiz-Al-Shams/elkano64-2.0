@@ -30,11 +30,12 @@ const SocialLogin = () => {
 
 
     return (
-        <div className='m-4'>
-            <div className="divider">OR</div>
+        <div>
+            <div className="divider my-4 text-xs font-medium text-base-content/70 before:bg-base-300 after:bg-base-300">OR</div>
             <button
+                type="button"
                 onClick={handleGoogleSignIn}
-                className='btn btn-outline w-full flex items-center justify-center gap-3 hover:bg-base-200 hover:text-base-content'
+                className='btn h-12 w-full flex items-center justify-center gap-3 rounded-lg border border-base-content/30 bg-base-100 text-sm font-medium normal-case text-base-content shadow-none hover:border-base-content/40 hover:bg-base-200'
             >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9231 12.0477 13.5613V15.8195H14.9564C16.6582 14.2527 17.64 11.9454 17.64 9.20454Z" fill="#4285F4" />

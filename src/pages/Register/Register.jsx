@@ -4,8 +4,27 @@ import AuthContext from "../../context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { FaArrowRight, FaBox, FaCalendarDays, FaRegEnvelope, FaRegImage, FaRegUser, FaUtensils } from "react-icons/fa6";
+import { MdOutlineLock } from "react-icons/md";
+import AuthLayout from "../../components/AuthLayout";
+import registerImage from "../../assets/register_image.webp";
 
+const labelClass = "mb-1.5 block text-sm font-semibold text-base-content";
+const inputClass =
+    "h-11 w-full rounded-lg border border-base-300 bg-base-200/50 pl-10 pr-3 text-sm text-base-content outline-none transition placeholder:text-base-content/50 focus:border-primary focus:bg-base-100";
+const iconClass = "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base text-base-content/60";
 
+const panel = {
+    title: "Join Elkano64",
+    tagline: "Good food. Great moments.\nMake them yours.",
+    iconClass: "border-accent/80 text-accent",
+    leafClass: "-left-3 -top-2 rotate-[160deg]",
+    features: [
+        { icon: <FaUtensils />, title: "Order your favorites", text: "Delicious food, right at your fingertips." },
+        { icon: <FaCalendarDays />, title: "Book tables with ease", text: "Your perfect seat, just a click away." },
+        { icon: <FaBox />, title: "Keep track of every order", text: "Stay updated, always." },
+    ],
+};
 
 const Register = () => {
 
@@ -94,59 +113,65 @@ const Register = () => {
 
     return (
         <>
-            <div className="hero bg-base-100 min-h-[60vh] mt-10 mb-20">
+            <Helmet>
+                <title>Elkano64 - Register</title>
+            </Helmet>
 
-                <Helmet>
-                    <title>Elkano64 - Register</title>
-                </Helmet>
-
-                <div className="hero-content flex-col lg:flex-row gap-8">
-
-                    <div className="text-center lg:text-left">
-                        <h1 className="text-4xl font-bold">Please Sign Up</h1>
-                    </div>
-
-                    <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-
-                        <form onSubmit={handleRegister} className="card-body">
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text">Name</span>
-                                </label>
-                                <input type="text" name="name" placeholder="name" className="input input-bordered" required />
-                            </div>
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text">Email</span>
-                                </label>
-                                <input type="email" name='email' placeholder="email" className="input input-bordered" required />
-                            </div>
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text">photoURL</span>
-                                </label>
-                                <input type="text" name="photoURL" placeholder="photoURL" className="input input-bordered" required />
-                            </div>
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text">Password</span>
-                                </label>
-                                <input type="password" name='password' placeholder="password" className="input input-bordered" required />
-                            </div>
-                            <div className="form-control mt-6">
-                                <button className="btn btn-primary">Register</button>
-                            </div>
-                        </form>
-                        <div className="text-center">
-                            <p>Already have an account?</p>
-                            <Link to="/signIn">
-                                <button className="mt-1.5 btn bg-base-300 text-base-content px-8">Login</button>
-                            </Link>
+            <AuthLayout
+                image={registerImage}
+                panel={panel}
+                eyebrow="Create your account"
+                eyebrowBothLines
+                heading="Become part of the table"
+                subtitle="Create your account to make every visit easier."
+            >
+                <form onSubmit={handleRegister} className="space-y-4">
+                    <div>
+                        <label htmlFor="name" className={labelClass}>Name</label>
+                        <div className="relative">
+                            <FaRegUser className={iconClass} />
+                            <input id="name" type="text" name="name" autoComplete="name" placeholder="Your full name" className={inputClass} required />
                         </div>
-                        <SocialLogin></SocialLogin>
                     </div>
-                </div>
-            </div>
+
+                    <div>
+                        <label htmlFor="email" className={labelClass}>Email</label>
+                        <div className="relative">
+                            <FaRegEnvelope className={iconClass} />
+                            <input id="email" type="email" name="email" autoComplete="email" placeholder="your@email.com" className={inputClass} required />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="photoURL" className={labelClass}>Photo URL</label>
+                        <div className="relative">
+                            <FaRegImage className={iconClass} />
+                            <input id="photoURL" type="text" name="photoURL" placeholder="https://example.com/photo.jpg" className={inputClass} required />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="password" className={labelClass}>Password</label>
+                        <div className="relative">
+                            <MdOutlineLock className={iconClass} />
+                            <input id="password" type="password" name="password" autoComplete="new-password" placeholder="Create a strong password" className={inputClass} required />
+                        </div>
+                    </div>
+
+                    <button type="submit" className="btn btn-primary mt-2 h-12 w-full gap-2 rounded-lg text-base normal-case">
+                        Create Account <FaArrowRight />
+                    </button>
+                </form>
+
+                <SocialLogin></SocialLogin>
+
+                <p className="mt-5 text-center text-sm text-base-content">
+                    Already have an account?{" "}
+                    <Link to="/signIn" className="font-semibold text-primary underline underline-offset-2 hover:opacity-80">
+                        Log in
+                    </Link>
+                </p>
+            </AuthLayout>
         </>
     );
 };

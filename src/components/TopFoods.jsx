@@ -65,7 +65,7 @@ const TopFoods = () => {
                                     to={`/food-purchase/${food._id}`}
                                     className="btn btn-primary btn-sm mt-auto w-full gap-1.5 normal-case"
                                 >
-                                    <FaCartShopping className="text-xs" /> Add to Cart
+                                    <FaCartShopping className="text-xs" /> Purchase
                                 </Link>
                             </div>
                         </div>
