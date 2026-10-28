@@ -4,16 +4,16 @@ import { FaCartShopping, FaLeaf, FaMagnifyingGlass, FaShieldHalved, FaTruckFast,
 import { MdTableRestaurant } from "react-icons/md";
 import useTableBooking from "../hooks/useTableBooking";
 
+// local banner images (src/assets) – shown in this exact order
+import slide1 from "../assets/slide_1.webp";
+import slide2 from "../assets/slide_2.webp";
+import slide3 from "../assets/slide_3.webp";
+
 /**
  * Background slides. Only these images move; all text stays fixed.
- * 👉 To use the hero photo from the design, save it as /public/images/hero-1.jpg
- *    and replace the FIRST item with "/images/hero-1.jpg".
+ * Order on the banner: slide_1 → slide_2 → slide_3.
  */
-const SLIDES = [
-    "https://i.ibb.co.com/KjTB1WT/slider33.jpg",
-    "https://i.ibb.co.com/mh8mC5L/slide11.jpg",
-    "https://i.ibb.co.com/0qs1h6t/slider22.jpg",
-];
+const SLIDES = [slide1, slide2, slide3];
 
 const AUTO_PLAY_MS = 5000;
 const SLIDE_MS = 1200;

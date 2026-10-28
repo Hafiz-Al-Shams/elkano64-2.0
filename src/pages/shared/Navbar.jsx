@@ -101,7 +101,7 @@ const Navbar = () => {
         <header className="sticky top-0 z-50 border-b border-base-300/60 bg-base-100/95 text-base-content shadow-sm backdrop-blur">
             <div className="mx-auto flex h-14 lg:h-16 max-w-screen-2xl items-center justify-between gap-2 px-3 md:px-8 lg:px-16">
                 {/* ---------- Left : burger + logo ---------- */}
-                <div className="flex items-center gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                     <div className="dropdown lg:hidden">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-sm px-2" aria-label="Open menu">
                             <FaBars className="text-lg" />
@@ -128,7 +128,7 @@ const Navbar = () => {
                 </nav>
 
                 {/* ---------- Right : search + auth area ---------- */}
-                <div className="flex items-center gap-1.5 md:gap-3">
+                <div className="flex shrink-0 items-center gap-1.5 md:gap-3">
                     <button
                         type="button"
                         onClick={() => setSearchOpen(true)}
@@ -168,15 +168,16 @@ const Navbar = () => {
                         <>
                             <NavLink
                                 to="/signIn"
-                                className="btn btn-outline btn-sm rounded-full border-base-content/30 px-4 text-xs md:btn-md md:px-7 md:text-sm"
+                                className="btn btn-outline btn-sm h-8 min-h-0 rounded-full border-base-content/30 px-4 text-xs font-medium normal-case md:px-5"
                             >
                                 Login
                             </NavLink>
+                            {/* Register: hidden on small screens (reachable from the Login page), shown from md up */}
                             <NavLink
                                 to="/register"
-                                className="btn btn-primary btn-sm rounded-full px-4 text-xs md:btn-md md:px-7 md:text-sm"
+                                className="btn btn-primary btn-sm hidden h-8 min-h-0 rounded-full px-5 text-xs font-medium normal-case md:inline-flex"
                             >
-                                Sign Up
+                                Register
                             </NavLink>
                         </>
                     )}
