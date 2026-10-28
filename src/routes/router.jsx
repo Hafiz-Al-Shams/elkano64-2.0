@@ -15,6 +15,32 @@ import MyOrders from "../pages/MyOrders/MyOrders";
 import Gallery from "../pages/Gallery/Gallery";
 
 
+const API_BASE = "https://elkano64-server.vercel.app";
+
+/**
+ * Loader helper: fetches JSON and THROWS when something is wrong
+ * (server error, food not found / null result, bad id, no connection...),
+ * so React Router sends the user to the route's errorElement (your ErrorPage)
+ * instead of rendering a broken page.
+ * On success it returns exactly the same data your loaders returned before.
+ */
+const loadJson = async (path) => {
+    const res = await fetch(`${API_BASE}${path}`);
+
+    if (!res.ok) {
+        throw new Response("Not Found", { status: res.status, statusText: res.statusText });
+    }
+
+    const data = await res.json();
+
+    if (data === null || data === undefined) {
+        throw new Response("Not Found", { status: 404, statusText: "Not Found" });
+    }
+
+    return data;
+};
+
+
 // Shown only during the very first load while route loaders are fetching data
 const HydrateFallback = () => {
     return (
@@ -29,6 +55,8 @@ const router = createBrowserRouter([
     {
         path: "/",
         element: <MainLayout></MainLayout>,
+        // any loader / render error inside the app now shows your ErrorPage
+        errorElement: <ErrorPage></ErrorPage>,
         HydrateFallback: HydrateFallback,
         children: [
             {
@@ -46,12 +74,12 @@ const router = createBrowserRouter([
             {
                 path: 'gallery',
                 element: <Gallery></Gallery>,
-                loader: () => fetch(`https://elkano64-server.vercel.app/foods`)
+                loader: () => loadJson(`/foods`)
             },
             {
                 path: 'all-foods',
                 element: <AllFoods></AllFoods>,
-                loader: () => fetch(`https://elkano64-server.vercel.app/foods`)
+                loader: () => loadJson(`/foods`)
             },
             {
                 path: 'add-food',
@@ -60,22 +88,22 @@ const router = createBrowserRouter([
             {
                 path: 'update-food/:foodId',
                 element: <PrivateRoute><UpdateFood></UpdateFood></PrivateRoute>,
-                loader: ({ params }) => fetch(`https://elkano64-server.vercel.app/foods/${params.foodId}`)
+                loader: ({ params }) => loadJson(`/foods/${params.foodId}`)
             },
             {
                 path: 'foods/:foodId',
                 element: <FoodDetails></FoodDetails>,
-                loader: ({ params }) => fetch(`https://elkano64-server.vercel.app/foods/${params.foodId}`)
+                loader: ({ params }) => loadJson(`/foods/${params.foodId}`)
             },
             {
                 path: 'food-purchase/:foodId',
                 element: <PrivateRoute><FoodPurchase></FoodPurchase></PrivateRoute>,
-                loader: ({ params }) => fetch(`https://elkano64-server.vercel.app/foods/${params.foodId}`)
+                loader: ({ params }) => loadJson(`/foods/${params.foodId}`)
             },
             {
                 path: 'my-foods/:emailId',
                 element: <PrivateRoute><MyFoods></MyFoods></PrivateRoute>,
-                loader: ({ params }) => fetch(`https://elkano64-server.vercel.app/foods/email/${params.emailId}`)
+                loader: ({ params }) => loadJson(`/foods/email/${params.emailId}`)
             },
             {
                 path: 'my-orders',

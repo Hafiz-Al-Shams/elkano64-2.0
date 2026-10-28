@@ -22,7 +22,7 @@ const Footer = () => {
             <FaLeaf className="pointer-events-none absolute -left-3 bottom-2 rotate-[20deg] text-7xl text-secondary/40" />
             <FaLeaf className="pointer-events-none absolute -right-3 bottom-4 -rotate-[30deg] text-7xl text-secondary/40" />
 
-            <div className="relative mx-auto grid max-w-screen-2xl items-center gap-8 px-6 pb-6 pt-10 md:px-12 lg:grid-cols-3 lg:px-24">
+            <div className="relative mx-auto grid max-w-screen-2xl items-center gap-8 px-3 pb-6 pt-10 md:px-8 lg:grid-cols-3 lg:px-16">
                 {/* brand */}
                 <div className="text-center lg:text-left">
                     <p className="font-serif text-3xl font-bold">Elkano64</p>
