@@ -13,6 +13,8 @@ import UpdateFood from "../pages/UpdateFood/UpdateFood";
 import MyFoods from "../pages/MyFoods/MyFoods";
 import MyOrders from "../pages/MyOrders/MyOrders";
 import Gallery from "../pages/Gallery/Gallery";
+import About from "../components/About";
+import Contact from "../components/Contact";
 
 
 const API_BASE = "https://elkano64-server.vercel.app";
@@ -80,6 +82,14 @@ const router = createBrowserRouter([
                 path: 'all-foods',
                 element: <AllFoods></AllFoods>,
                 loader: () => loadJson(`/foods`)
+            },
+            {
+                path: 'about',
+                element: <About></About>,
+            },
+            {
+                path: 'contact',
+                element: <Contact></Contact>,
             },
             {
                 path: 'add-food',
