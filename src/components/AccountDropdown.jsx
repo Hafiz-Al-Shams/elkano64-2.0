@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import {
     FaArrowRightFromBracket,
     FaBagShopping,
+    FaCalendarCheck,
     FaChevronDown,
     FaChevronRight,
     FaChevronUp,
@@ -47,6 +48,7 @@ const AccountDropdown = ({ user, onLogOut }) => {
         { label: "My Foods", to: `/my-foods/${user?.email}`, Icon: FaUtensils },
         { label: "Add food", to: "/add-food", Icon: FaPlus },
         { label: "My Orders", to: "/my-orders", Icon: FaBagShopping },
+        { label: "My Bookings", to: "/my-bookings", Icon: FaCalendarCheck },
     ];
 
     const handleLogOutClick = () => {

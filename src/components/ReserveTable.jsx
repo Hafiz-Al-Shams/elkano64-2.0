@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa6";
 import { MdTableRestaurant } from "react-icons/md";
 import AuthContext from "../context/AuthContext/AuthContext";
+import { createBooking } from "../utils/bookingApi";
 
 // 👉 Replace with your own restaurant interior photo
 const RESERVE_IMAGE =
@@ -35,17 +36,20 @@ const getToday = () => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
+const INITIAL_FORM = { date: "", time: "", guests: "1" };
+
 const fieldClass =
-    "h-11 w-full rounded-lg border bg-white/10 pl-10 pr-3 text-sm text-neutral-content outline-none transition focus:bg-white/15";
+    "h-11 w-full rounded-lg border bg-white/10 pl-10 pr-3 text-sm text-neutral-content outline-none transition focus:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60";
 
 const ReserveTable = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // guests defaults to "1", exactly like the booking modal
-    const [form, setForm] = useState({ date: "", time: "", guests: "1" });
+    const [form, setForm] = useState(INITIAL_FORM);
     const [invalidFields, setInvalidFields] = useState([]); // fields to mark red
     const [errorMessage, setErrorMessage] = useState(""); // small red message under the form
+    const [isSubmitting, setIsSubmitting] = useState(false); // true while the request is running
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -73,8 +77,9 @@ const ReserveTable = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // ignore double clicks
 
         // 1) not logged in: SweetAlert, even if every field is filled
         if (!user) {
@@ -101,10 +106,46 @@ const ReserveTable = () => {
             return;
         }
 
-        // 3) everything is valid: the real booking will be connected later
+        // 3) everything is valid: send the booking to the server
         setInvalidFields([]);
         setErrorMessage("");
-        // TODO: send the booking to the server here (form.date, form.time, form.guests, user).
+        setIsSubmitting(true);
+
+        try {
+            await createBooking({
+                name: user.displayName || "",
+                email: user.email,
+                date: form.date,
+                time: form.time,
+                guests: Number(form.guests),
+            });
+
+            await Swal.fire({
+                icon: "success",
+                title: "Table booked!",
+                text: `Your table for ${form.guests} ${Number(form.guests) === 1 ? "guest" : "guests"} on ${form.date} at ${form.time} is confirmed.`,
+                confirmButtonText: "Great",
+                confirmButtonColor: "#2f6b3f",
+            });
+
+            // clear the form for the next booking
+            setForm(INITIAL_FORM);
+        } catch (error) {
+            // server message (e.g. duplicate booking) or a network failure
+            const message =
+                error instanceof TypeError
+                    ? "Could not reach the server. Please check your connection and try again."
+                    : error.message;
+
+            Swal.fire({
+                icon: "error",
+                title: "Booking failed",
+                text: message,
+                confirmButtonColor: "#2f6b3f",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const borderFor = (name) =>
@@ -152,6 +193,7 @@ const ReserveTable = () => {
                                     value={form.date}
                                     min={getToday()}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                     aria-label="Date"
                                     aria-invalid={invalidFields.includes("date")}
                                     className={`${fieldClass} ${borderFor("date")} [color-scheme:dark]`}
@@ -165,6 +207,7 @@ const ReserveTable = () => {
                                     name="time"
                                     value={form.time}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                     aria-label="Time"
                                     aria-invalid={invalidFields.includes("time")}
                                     className={`${fieldClass} ${borderFor("time")} cursor-pointer appearance-none pr-8 ${form.time ? "" : "text-neutral-content/60"
@@ -189,6 +232,7 @@ const ReserveTable = () => {
                                     name="guests"
                                     value={form.guests}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                     aria-label="Guests"
                                     aria-invalid={invalidFields.includes("guests")}
                                     className={`${fieldClass} ${borderFor("guests")} cursor-pointer appearance-none pr-8`}
@@ -202,8 +246,20 @@ const ReserveTable = () => {
                                 <FaChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-content/70" />
                             </label>
 
-                            <button type="submit" className="btn btn-primary h-11 min-h-0 gap-2 px-6">
-                                <MdTableRestaurant className="text-lg" /> Book a Table
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="btn btn-primary h-11 min-h-0 gap-2 px-6"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span> Booking...
+                                    </>
+                                ) : (
+                                    <>
+                                        <MdTableRestaurant className="text-lg" /> Book a Table
+                                    </>
+                                )}
                             </button>
                         </form>
 

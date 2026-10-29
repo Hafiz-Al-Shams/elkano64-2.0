@@ -34,12 +34,6 @@ const Review = () => {
             <div className="mb-5 flex items-center gap-4">
                 <h2 className="font-serif text-xl font-bold lg:text-2xl">Customer Reviews</h2>
                 <span className="hidden h-px w-16 bg-primary/60 sm:block" />
-                <Link
-                    to="/gallery"
-                    className="ml-auto flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                >
-                    View All <FaArrowRight className="text-[10px]" />
-                </Link>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">

@@ -34,9 +34,6 @@ const OurStory = () => {
                     At Elkano64, we believe that great food brings people together. Our chefs use fresh ingredients
                     and traditional recipes to create unforgettable dining experiences.
                 </p>
-                <Link to="/gallery" className="btn btn-primary btn-sm mt-5 w-fit gap-2 px-5">
-                    Our Story <FaArrowRight className="text-xs" />
-                </Link>
             </div>
         </div>
     );

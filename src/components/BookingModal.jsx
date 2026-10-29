@@ -1,9 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
     FaArrowRight,
     FaChevronDown,
+    FaCircleExclamation,
     FaLeaf,
     FaRegCalendarDays,
     FaRegClock,
@@ -12,6 +15,8 @@ import {
     FaXmark,
 } from "react-icons/fa6";
 import { lockBodyScroll } from "../utils/lockBodyScroll";
+import AuthContext from "../context/AuthContext/AuthContext";
+import { createBooking } from "../utils/bookingApi";
 
 // dark-green headings in light mode, light text in dark mode
 const headingColor = "text-neutral [[data-theme=elkanoDark]_&]:text-base-content";
@@ -41,16 +46,25 @@ const getToday = () => {
 const fieldBox =
     "h-9 w-full rounded-lg border border-base-300 bg-base-100 px-3 text-xs text-base-content outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 sm:text-[13px]";
 
+// red border for a field that needs attention (replaces the normal border color)
+const invalidBox = "!border-error focus:!border-error focus:!ring-error/20";
+
 /**
  * Table-booking modal.
  * It is mounted only while open (parent: {open && <BookingModal onClose={...} />}),
  * so everything the user entered is reset automatically every time it closes.
  */
 const BookingModal = ({ onClose }) => {
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
+
     const [show, setShow] = useState(false);
     const [date, setDate] = useState("");
     const [time, setTime] = useState("");
     const [guests, setGuests] = useState("1");
+    const [invalidFields, setInvalidFields] = useState([]); // fields to mark red
+    const [errorMessage, setErrorMessage] = useState(""); // small red message above the button
+    const [isSubmitting, setIsSubmitting] = useState(false); // true while the request is running
 
     // fade / scale-in animation on open
     useEffect(() => {
@@ -63,7 +77,8 @@ const BookingModal = ({ onClose }) => {
         const unlockScroll = lockBodyScroll();
 
         const handleKeyDown = (e) => {
-            if (e.key === "Escape") onClose();
+            // don't close the modal while a booking request is running
+            if (e.key === "Escape" && !isSubmitting) onClose();
         };
         document.addEventListener("keydown", handleKeyDown);
 
@@ -71,11 +86,11 @@ const BookingModal = ({ onClose }) => {
             unlockScroll();
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [onClose]);
+    }, [onClose, isSubmitting]);
 
     // clicking the dark area outside the card closes the modal
     const handleBackdropMouseDown = (e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !isSubmitting) onClose();
     };
 
     const openDatePicker = (e) => {
@@ -86,9 +101,90 @@ const BookingModal = ({ onClose }) => {
         }
     };
 
-    // TODO: connect to the booking API when the server is ready.
-    // For now the button is intentionally inactive.
-    const handleConfirm = () => { };
+    // remove the red mark of a field as soon as the user changes it
+    const clearInvalid = (name) => {
+        if (!invalidFields.includes(name)) return;
+        const remaining = invalidFields.filter((field) => field !== name);
+        setInvalidFields(remaining);
+        if (remaining.length === 0) setErrorMessage("");
+    };
+
+    const handleConfirm = async () => {
+        if (isSubmitting) return; // ignore double clicks
+
+        // 1) not logged in: close the modal and ask the user to log in
+        if (!user) {
+            onClose();
+            Swal.fire({
+                icon: "warning",
+                title: "Login required",
+                text: "You must be logged in to book a table.",
+                showCancelButton: true,
+                confirmButtonText: "Go to Login",
+                cancelButtonText: "Not now",
+                confirmButtonColor: "#2f6b3f",
+            }).then((result) => {
+                if (result.isConfirmed) navigate("/signIn");
+            });
+            return;
+        }
+
+        // 2) something is missing / invalid: red marks + message
+        const missing = [];
+        const pastDate = date && date < getToday();
+        if (!date || pastDate) missing.push("date");
+        if (!time) missing.push("time");
+        if (!guests) missing.push("guests");
+
+        if (missing.length > 0) {
+            setInvalidFields(missing);
+            setErrorMessage(
+                pastDate
+                    ? "Please choose today's date or a future date, and complete the marked fields."
+                    : "Please complete the marked fields to book a table."
+            );
+            return;
+        }
+
+        // 3) everything is valid: send the booking to the server
+        setInvalidFields([]);
+        setErrorMessage("");
+        setIsSubmitting(true);
+
+        try {
+            await createBooking({
+                name: user.displayName || "",
+                email: user.email,
+                date,
+                time,
+                guests: Number(guests),
+            });
+
+            // booking saved: close the modal first, then confirm to the user
+            onClose();
+            Swal.fire({
+                icon: "success",
+                title: "Table booked!",
+                text: `Your table for ${guests} ${Number(guests) === 1 ? "guest" : "guests"} on ${date} at ${time} is confirmed.`,
+                confirmButtonText: "Great",
+                confirmButtonColor: "#2f6b3f",
+            });
+        } catch (error) {
+            // server message (e.g. duplicate booking) or a network failure
+            const message =
+                error instanceof TypeError
+                    ? "Could not reach the server. Please check your connection and try again."
+                    : error.message;
+
+            Swal.fire({
+                icon: "error",
+                title: "Booking failed",
+                text: message,
+                confirmButtonColor: "#2f6b3f",
+            });
+            setIsSubmitting(false); // keep the modal open so the user can retry
+        }
+    };
 
     return createPortal(
         <div
@@ -132,8 +228,9 @@ const BookingModal = ({ onClose }) => {
                     <button
                         type="button"
                         onClick={onClose}
+                        disabled={isSubmitting}
                         aria-label="Close booking"
-                        className="absolute right-3 top-3 z-20 text-primary transition-transform hover:rotate-90 sm:right-5 sm:top-4"
+                        className="absolute right-3 top-3 z-20 text-primary transition-transform hover:rotate-90 disabled:opacity-50 sm:right-5 sm:top-4"
                     >
                         <FaXmark className="text-lg sm:text-xl" />
                     </button>
@@ -163,10 +260,15 @@ const BookingModal = ({ onClose }) => {
                                     type="date"
                                     value={date}
                                     min={getToday()}
-                                    onChange={(e) => setDate(e.target.value)}
+                                    onChange={(e) => {
+                                        setDate(e.target.value);
+                                        clearInvalid("date");
+                                    }}
                                     onClick={openDatePicker}
+                                    disabled={isSubmitting}
                                     aria-label="Select date"
-                                    className={`${fieldBox} relative cursor-pointer pr-8 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [color-scheme:light] [[data-theme=elkanoDark]_&]:[color-scheme:dark] ${date ? "" : "text-transparent"
+                                    aria-invalid={invalidFields.includes("date")}
+                                    className={`${fieldBox} ${invalidFields.includes("date") ? invalidBox : ""} relative cursor-pointer pr-8 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [color-scheme:light] [[data-theme=elkanoDark]_&]:[color-scheme:dark] ${date ? "" : "text-transparent"
                                         }`}
                                 />
                                 {!date && (
@@ -186,9 +288,14 @@ const BookingModal = ({ onClose }) => {
                             <div className="relative">
                                 <select
                                     value={time}
-                                    onChange={(e) => setTime(e.target.value)}
+                                    onChange={(e) => {
+                                        setTime(e.target.value);
+                                        clearInvalid("time");
+                                    }}
+                                    disabled={isSubmitting}
                                     aria-label="Select time"
-                                    className={`${fieldBox} cursor-pointer appearance-none pr-8 ${time ? "" : "text-base-content/55"}`}
+                                    aria-invalid={invalidFields.includes("time")}
+                                    className={`${fieldBox} ${invalidFields.includes("time") ? invalidBox : ""} cursor-pointer appearance-none pr-8 ${time ? "" : "text-base-content/55"}`}
                                 >
                                     <option value="">Select Time</option>
                                     {TIME_SLOTS.map((slot) => (
@@ -209,9 +316,14 @@ const BookingModal = ({ onClose }) => {
                             <div className="relative">
                                 <select
                                     value={guests}
-                                    onChange={(e) => setGuests(e.target.value)}
+                                    onChange={(e) => {
+                                        setGuests(e.target.value);
+                                        clearInvalid("guests");
+                                    }}
+                                    disabled={isSubmitting}
                                     aria-label="Number of guests"
-                                    className={`${fieldBox} cursor-pointer appearance-none pr-8`}
+                                    aria-invalid={invalidFields.includes("guests")}
+                                    className={`${fieldBox} ${invalidFields.includes("guests") ? invalidBox : ""} cursor-pointer appearance-none pr-8`}
                                 >
                                     {GUEST_OPTIONS.map((n) => (
                                         <option key={n} value={n}>
@@ -224,14 +336,33 @@ const BookingModal = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* confirm (inactive for now) */}
+                    {/* red message for missing / invalid fields */}
+                    {errorMessage && (
+                        <p
+                            role="alert"
+                            className="relative mt-2.5 flex items-center justify-center gap-2 text-center text-xs font-medium text-error"
+                        >
+                            <FaCircleExclamation className="shrink-0" />
+                            {errorMessage}
+                        </p>
+                    )}
+
+                    {/* confirm */}
                     <button
                         type="button"
                         onClick={handleConfirm}
-                        title="Online booking is coming soon"
+                        disabled={isSubmitting}
                         className={`btn btn-primary relative mt-3.5 h-9 min-h-0 w-full justify-center gap-2 rounded-lg font-serif text-sm font-semibold normal-case sm:mt-4 sm:h-10 sm:text-base ${short}:!mt-2.5`}
                     >
-                        Confirm Reservation <FaArrowRight className="text-sm" />
+                        {isSubmitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span> Booking...
+                            </>
+                        ) : (
+                            <>
+                                Confirm Reservation <FaArrowRight className="text-sm" />
+                            </>
+                        )}
                     </button>
 
                     {/* footer tagline (hidden on very short screens to avoid scrolling) */}

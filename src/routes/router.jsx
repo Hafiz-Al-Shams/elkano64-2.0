@@ -12,6 +12,7 @@ import AddFood from "../pages/AddFood/AddFood";
 import UpdateFood from "../pages/UpdateFood/UpdateFood";
 import MyFoods from "../pages/MyFoods/MyFoods";
 import MyOrders from "../pages/MyOrders/MyOrders";
+import MyBookings from "../pages/MyBookings/MyBookings";
 import Gallery from "../pages/Gallery/Gallery";
 import About from "../components/About";
 import Contact from "../components/Contact";
@@ -118,6 +119,10 @@ const router = createBrowserRouter([
             {
                 path: 'my-orders',
                 element: <PrivateRoute><MyOrders></MyOrders></PrivateRoute>,
+            },
+            {
+                path: 'my-bookings',
+                element: <PrivateRoute><MyBookings></MyBookings></PrivateRoute>,
             },
         ]
     },
