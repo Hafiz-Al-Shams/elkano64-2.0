@@ -5,9 +5,8 @@
 @tailwind utilities;
 
 @layer base {
-    html {
-        scroll-behavior: smooth;
-    }
+    /* NOTE: global "scroll-behavior: smooth" was removed on purpose so that
+       opening a new page always jumps to the top instantly (ScrollRestoration). */
 
     body {
         font-family: "Sora", sans-serif;
