@@ -43,6 +43,9 @@ const FoodPurchase = () => {
     // the ONLY editable value on this page – shared by the stepper (left card) and the Quantity field (right card)
     const [quantity, setQuantity] = useState("1");
 
+    // true while the order request is running – blocks double clicks (which would reduce stock twice)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const unitPrice = Number(food?.price) || 0;
     const available = Number(food?.availableQuantity) || 0;
     const qtyNumber = parseInt(quantity) || 0;
@@ -53,6 +56,9 @@ const FoodPurchase = () => {
 
     const handlePurchaseFood = (e) => {
         e.preventDefault();
+
+        // ignore the click if an order is already being sent
+        if (isSubmitting) return;
 
         const form = e.target;
 
@@ -65,7 +71,8 @@ const FoodPurchase = () => {
         const buyerName = form.buyerName.value;
         const buyerEmail = form.buyerEmail.value;
 
-        const newPurchase = { name, totalPrice, numQuantity, buyerName, buyerEmail };
+        // foodId lets the server find the exact food and reduce ITS available quantity
+        const newPurchase = { foodId: food._id, name, totalPrice, numQuantity, buyerName, buyerEmail };
 
         // extra
         if (user.email == food.userEmail) {
@@ -100,6 +107,8 @@ const FoodPurchase = () => {
             return;
         }
 
+        setIsSubmitting(true);
+
         // sending data to the server
         fetch("https://elkano64-server.vercel.app/purchases", {
             method: "POST",
@@ -110,7 +119,7 @@ const FoodPurchase = () => {
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data.insertResult.insertedId) {
+                if (data.insertResult?.insertedId) {
                     Swal.fire({
                         position: "center",
                         icon: "success",
@@ -118,7 +127,25 @@ const FoodPurchase = () => {
                         confirmButtonText: "cool",
                     });
                     navigate("/my-orders");
+                } else {
+                    // the server refused the order (e.g. someone else just bought the stock)
+                    setIsSubmitting(false);
+                    Swal.fire({
+                        title: "Order Failed",
+                        text: data.message || "Something went wrong. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "understood",
+                    });
                 }
+            })
+            .catch(() => {
+                setIsSubmitting(false);
+                Swal.fire({
+                    title: "Order Failed",
+                    text: "Could not reach the server. Please try again.",
+                    icon: "error",
+                    confirmButtonText: "understood",
+                });
             });
     };
 
@@ -372,9 +399,13 @@ const FoodPurchase = () => {
                                 </div>
                             </div>
 
-                            <button type="submit" className="btn btn-primary mt-7 h-12 min-h-0 w-full gap-2 text-sm">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="btn btn-primary mt-7 h-12 min-h-0 w-full gap-2 text-sm"
+                            >
                                 <FaCartShopping className="text-base" />
-                                Purchase
+                                {isSubmitting ? "Processing..." : "Purchase"}
                                 <FaArrowRight className="text-sm" />
                             </button>
                         </form>

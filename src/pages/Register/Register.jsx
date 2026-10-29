@@ -45,27 +45,14 @@ const Register = () => {
         const password = form.password.value;
         // console.log(email, password);
 
-        // password validation
+        // password validation: the ONLY rule is a minimum length of 6 characters
+        // (any mix of letters, numbers or symbols is accepted)
         if (password.length < 6) {
             // alert('Password must be 6 characters or longer');
 
             Swal.fire({
                 // title: 'Error!',
-                text: 'Password must be 6 characters or longer',
-                icon: 'error',
-                confirmButtonText: 'Try Again'
-            });
-            return;
-        }
-
-        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,15}$/;
-
-        if (!passRegex.test(password)) {
-            // alert('at least One Number, One Uppercase & One Lowercase is needed');
-
-            Swal.fire({
-                // title: 'Error!',
-                text: 'at least One Number, One Uppercase & One Lowercase is needed [DO NOT input Special Character!!!!]',
+                text: 'Password must be at least 6 characters long.',
                 icon: 'error',
                 confirmButtonText: 'Try Again'
             });
@@ -154,7 +141,7 @@ const Register = () => {
                         <label htmlFor="password" className={labelClass}>Password</label>
                         <div className="relative">
                             <MdOutlineLock className={iconClass} />
-                            <input id="password" type="password" name="password" autoComplete="new-password" placeholder="Create a strong password" className={inputClass} required />
+                            <input id="password" type="password" name="password" autoComplete="new-password" placeholder="At least 6 characters" className={inputClass} required />
                         </div>
                     </div>
 
