@@ -112,7 +112,7 @@ const UpdateFood = () => {
     return (
         <div className="relative min-h-screen overflow-hidden bg-base-200 pb-14 pt-6 lg:pb-20">
             <Helmet>
-                <title>Elkano64 - Update Food Here</title>
+                <title>Elkano64 - Update Food</title>
             </Helmet>
 
             {/* decorative leaves */}

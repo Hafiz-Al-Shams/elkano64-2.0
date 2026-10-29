@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaCartShopping, FaLeaf, FaMagnifyingGlass, FaShieldHalved, FaTruckFast, FaUtensils } from "react-icons/fa6";
 import { MdTableRestaurant } from "react-icons/md";
-import useTableBooking from "../hooks/useTableBooking";
+import BookingModal from "./BookingModal";
+import useBookingModal from "../hooks/useBookingModal";
 
 // local banner images (src/assets) – shown in this exact order
 import slide1 from "../assets/slide_1.webp";
@@ -27,9 +28,11 @@ const features = [
 
 const Banner = () => {
     const navigate = useNavigate();
-    const { handleBookings, processingOverlay } = useTableBooking();
 
     const [query, setQuery] = useState("");
+    const searchInputRef = useRef(null);
+    // modal only opens for logged-in users (logic lives in the hook)
+    const { bookingOpen, openBooking, closeBooking } = useBookingModal();
 
     /* ---------- infinite auto-sliding background (clone of first slide at the end) ---------- */
     const total = SLIDES.length;
@@ -57,7 +60,16 @@ const Banner = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         const q = query.trim();
-        navigate(q ? `/all-foods?search=${encodeURIComponent(q)}` : "/all-foods");
+
+        // empty / whitespace-only search → no redirect, clear the box and keep typing
+        if (!q) {
+            setQuery("");
+            searchInputRef.current?.focus();
+            return;
+        }
+
+        // same behaviour as the navbar search modal → All Foods page with the keyword in its search bar
+        navigate(`/all-foods?search=${encodeURIComponent(q)}`);
     };
 
     return (
@@ -117,6 +129,7 @@ const Banner = () => {
                 >
                     <FaUtensils className="mx-3 shrink-0 text-base-content/50" />
                     <input
+                        ref={searchInputRef}
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -139,7 +152,7 @@ const Banner = () => {
                     </Link>
                     <button
                         type="button"
-                        onClick={handleBookings}
+                        onClick={openBooking}
                         className="btn rounded-full border-white/70 bg-black/20 px-6 text-white backdrop-blur hover:border-white hover:bg-white/20"
                     >
                         <MdTableRestaurant className="text-lg" /> Book a Table
@@ -162,7 +175,8 @@ const Banner = () => {
                 </div>
             </div>
 
-            {processingOverlay}
+            {/* ---------- table booking modal ---------- */}
+            {bookingOpen && <BookingModal onClose={closeBooking} />}
         </section>
     );
 };

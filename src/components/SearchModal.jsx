@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { FaFire, FaLeaf, FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
+import { lockBodyScroll } from "../utils/lockBodyScroll";
 
 const popularSearches = [
     "Biryani",
@@ -27,12 +28,11 @@ const SearchModal = ({ onClose }) => {
         return () => cancelAnimationFrame(id);
     }, []);
 
-    // focus the input, lock page scroll, close on Esc
+    // focus the input, lock page scroll (without the page shifting sideways), close on Esc
     useEffect(() => {
         inputRef.current?.focus();
 
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
+        const unlockScroll = lockBodyScroll();
 
         const handleKeyDown = (e) => {
             if (e.key === "Escape") onClose();
@@ -40,19 +40,30 @@ const SearchModal = ({ onClose }) => {
         document.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            document.body.style.overflow = previousOverflow;
+            unlockScroll();
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [onClose]);
 
     const goToResults = (term) => {
         const q = term.trim();
-        navigate(q ? `/all-foods?search=${encodeURIComponent(q)}` : "/all-foods");
+        // empty / whitespace-only search → do nothing (no redirect)
+        if (!q) return;
+
+        navigate(`/all-foods?search=${encodeURIComponent(q)}`);
         onClose();
     };
 
     const handleSubmit = (e) => {
         e.preventDefault(); // runs for both Enter key and the search button
+
+        // only spaces typed → clear the box, keep the modal open and ready for typing
+        if (!query.trim()) {
+            setQuery("");
+            inputRef.current?.focus();
+            return;
+        }
+
         goToResults(query);
     };
 

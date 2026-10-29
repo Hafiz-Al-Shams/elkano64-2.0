@@ -11,6 +11,8 @@ import {
     FaUtensils,
 } from "react-icons/fa6";
 import { GiChefToque } from "react-icons/gi";
+import BookingModal from "./BookingModal";
+import useBookingModal from "../hooks/useBookingModal";
 
 // local images (src/assets)
 import frontImg from "../assets/Elkano64_Front.webp";
@@ -61,6 +63,9 @@ const stats = [
 ];
 
 const About = () => {
+    // modal only opens for logged-in users (logic lives in the hook)
+    const { bookingOpen, openBooking, closeBooking } = useBookingModal();
+
     return (
         <div className="relative min-h-screen overflow-hidden bg-base-100">
             <Helmet>
@@ -273,12 +278,19 @@ const About = () => {
                         Good food, great company, and unforgettable moments await.
                     </p>
 
-                    {/* no action yet – the booking feature will be connected later */}
-                    <button type="button" className="btn btn-primary btn-sm mt-5 h-10 min-h-0 gap-2 rounded-full px-7 text-xs">
+                    {/* opens the table-booking modal */}
+                    <button
+                        type="button"
+                        onClick={openBooking}
+                        className="btn btn-primary btn-sm mt-5 h-10 min-h-0 gap-2 rounded-full px-7 text-xs"
+                    >
                         Book a Table <FaArrowRight className="text-[11px]" />
                     </button>
                 </div>
             </section>
+
+            {/* ---------- table booking modal ---------- */}
+            {bookingOpen && <BookingModal onClose={closeBooking} />}
         </div>
     );
 };

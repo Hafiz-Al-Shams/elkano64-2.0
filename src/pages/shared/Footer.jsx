@@ -5,8 +5,8 @@ const footerLinks = [
     { label: "Home", to: "/" },
     { label: "All Foods", to: "/all-foods" },
     { label: "Gallery", to: "/gallery" },
-    { label: "About", to: "/#about" },
-    { label: "Contact", to: "/#contact" },
+    { label: "About", to: "/about" },
+    { label: "Contact", to: "/contact" },
 ];
 
 const socials = [

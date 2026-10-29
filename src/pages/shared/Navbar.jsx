@@ -14,12 +14,8 @@ const routeLinks = [
     { label: "Home", to: "/", end: true },
     { label: "All Foods", to: "/all-foods" },
     { label: "Gallery", to: "/gallery" },
-];
-
-// Sections on the home page / footer (smooth-scrolled by Home.jsx)
-const hashLinks = [
-    { label: "About", to: "/#about" },
-    { label: "Contact", to: "/#contact" },
+    { label: "About", to: "/about" },
+    { label: "Contact", to: "/contact" },
 ];
 
 const closeDropdown = () => document.activeElement?.blur();
@@ -68,13 +64,6 @@ const Navbar = () => {
                     </NavLink>
                 </li>
             ))}
-            {hashLinks.map((l) => (
-                <li key={l.label}>
-                    <Link to={l.to} className="py-2 text-sm font-medium transition-colors hover:text-primary">
-                        {l.label}
-                    </Link>
-                </li>
-            ))}
         </>
     );
 
@@ -85,13 +74,6 @@ const Navbar = () => {
                     <NavLink to={l.to} end={l.end} onClick={closeDropdown}>
                         {l.label}
                     </NavLink>
-                </li>
-            ))}
-            {hashLinks.map((l) => (
-                <li key={l.label}>
-                    <Link to={l.to} onClick={closeDropdown}>
-                        {l.label}
-                    </Link>
                 </li>
             ))}
         </>

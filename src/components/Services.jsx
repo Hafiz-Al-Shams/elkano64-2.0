@@ -27,7 +27,7 @@ const Services = () => {
                     <p className="mt-3 max-w-xs text-sm text-base-content/80">
                         We serve more than just food — we serve experiences.
                     </p>
-                    <Link to="/#about" className="btn btn-primary btn-sm md:btn-md mt-5 gap-2 px-6">
+                    <Link to="/about" className="btn btn-primary btn-sm md:btn-md mt-5 gap-2 px-6">
                         Learn More <FaArrowRight className="text-xs" />
                     </Link>
                 </div>
