@@ -1,4 +1,6 @@
+import { useContext, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
     FaBowlFood,
@@ -11,6 +13,11 @@ import {
     FaRegHeart,
     FaUsers,
 } from "react-icons/fa6";
+import AuthContext from "../context/AuthContext/AuthContext";
+
+// Formspree form ID comes from .env  ->  VITE_FORMSPREE_ID=yourFormId
+const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID;
+const FORMSPREE_URL = `https://formspree.io/f/${FORMSPREE_ID}`;
 
 // dark-green headings in light mode, light text in dark mode
 const headingColor = "text-neutral [[data-theme=elkanoDark]_&]:text-base-content";
@@ -69,29 +76,111 @@ const reasons = [
     },
 ];
 
+const emptyForm = {
+    fullName: "",
+    email: "", // only used while the visitor is logged out
+    subject: "",
+    message: "",
+};
+
 const Contact = () => {
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    const handleSubmit = (e) => {
+    const [formData, setFormData] = useState(emptyForm);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Logged in  -> always the account email (locked)
+    // Logged out -> whatever the visitor types
+    const emailValue = user?.email ?? formData.email;
+    const isEmailLocked = Boolean(user?.email);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const form = e.target;
+        if (submitting) return;
 
-        // TODO: connect this to your backend / email service later.
-        // For now the form only validates and shows a confirmation – nothing is sent anywhere.
-        const message = {
-            name: form.fullName.value,
-            email: form.email.value,
-            subject: form.subject.value,
-            message: form.message.value,
-        };
-        console.log("Contact form (not sent anywhere yet):", message);
+        // ---- Gate: must be logged in ----
+        if (!user) {
+            const result = await Swal.fire({
+                title: "Please log in to continue",
+                text: "You must be logged in to contact us.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Log in",
+                cancelButtonText: "Not now",
+            });
 
-        Swal.fire({
-            title: "Message received!",
-            text: "Thanks for reaching out. We’ll get back to you within 24 hours.",
-            icon: "success",
-            confirmButtonText: "Great",
-        });
-        form.reset();
+            if (result.isConfirmed) {
+                navigate("/signIn", { state: { from: location } });
+            }
+            return; // nothing is sent
+        }
+
+        // ---- Safety check: missing env variable ----
+        if (!FORMSPREE_ID) {
+            console.error("VITE_FORMSPREE_ID is missing. Add it to your .env file and restart the dev server.");
+            Swal.fire({
+                title: "Contact form is not configured",
+                text: "Please try again later.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            const response = await fetch(FORMSPREE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    name: formData.fullName.trim(),
+                    email: user.email, // always the verified account email, never the typed one
+                    subject: formData.subject.trim(),
+                    message: formData.message.trim(),
+                    _subject: formData.subject.trim()
+                        ? `[Elkano64] ${formData.subject.trim()}`
+                        : "[Elkano64] New contact message",
+                }),
+            });
+
+            if (response.ok) {
+                Swal.fire({
+                    title: "Message received!",
+                    text: "Thanks for reaching out. We’ll get back to you within 24 hours.",
+                    icon: "success",
+                    confirmButtonText: "Great",
+                });
+                setFormData(emptyForm);
+            } else {
+                Swal.fire({
+                    title: "Something went wrong",
+                    text: "Your message could not be sent. Please try again.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+        } catch (error) {
+            console.error("Contact form error:", error);
+            Swal.fire({
+                title: "Network error",
+                text: "Please check your connection and try again.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -177,6 +266,8 @@ const Contact = () => {
                                             id="fullName"
                                             type="text"
                                             name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleChange}
                                             autoComplete="name"
                                             placeholder="Your Name"
                                             className={`${fieldClass} h-11`}
@@ -192,11 +283,21 @@ const Contact = () => {
                                             id="email"
                                             type="email"
                                             name="email"
+                                            value={emailValue}
+                                            onChange={handleChange}
+                                            readOnly={isEmailLocked}
+                                            aria-readonly={isEmailLocked}
                                             autoComplete="email"
                                             placeholder="Your Email"
-                                            className={`${fieldClass} h-11`}
+                                            className={`${fieldClass} h-11 ${isEmailLocked ? "cursor-not-allowed opacity-75 focus:ring-0" : ""
+                                                }`}
                                             required
                                         />
+                                        {isEmailLocked && (
+                                            <p className="mt-1.5 text-xs text-base-content/60">
+                                                Using your account email. Replies will be sent here.
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -207,6 +308,8 @@ const Contact = () => {
                                             id="subject"
                                             type="text"
                                             name="subject"
+                                            value={formData.subject}
+                                            onChange={handleChange}
                                             placeholder="Discussion Topic"
                                             className={`${fieldClass} h-11`}
                                         />
@@ -219,6 +322,8 @@ const Contact = () => {
                                         <textarea
                                             id="message"
                                             name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
                                             rows={5}
                                             placeholder="Tell us about your query, or just say hello..."
                                             className={`${fieldClass} min-h-[130px] resize-y py-3`}
@@ -228,9 +333,19 @@ const Contact = () => {
 
                                     <button
                                         type="submit"
+                                        disabled={submitting}
                                         className="btn btn-primary h-12 w-full gap-2 rounded-lg text-sm normal-case"
                                     >
-                                        Send Message <FaRegEnvelope />
+                                        {submitting ? (
+                                            <>
+                                                <span className="loading loading-spinner loading-sm" />
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Send Message <FaRegEnvelope />
+                                            </>
+                                        )}
                                     </button>
 
                                     <p className="text-center text-xs text-base-content/70">
