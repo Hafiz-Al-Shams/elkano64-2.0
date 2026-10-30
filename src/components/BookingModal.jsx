@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
     FaArrowRight,
@@ -57,6 +57,7 @@ const invalidBox = "!border-error focus:!border-error focus:!ring-error/20";
 const BookingModal = ({ onClose }) => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [show, setShow] = useState(false);
     const [date, setDate] = useState("");
@@ -124,7 +125,7 @@ const BookingModal = ({ onClose }) => {
                 cancelButtonText: "Not now",
                 confirmButtonColor: "#2f6b3f",
             }).then((result) => {
-                if (result.isConfirmed) navigate("/signIn");
+                if (result.isConfirmed) navigate("/signIn", { state: { from: location } });
             });
             return;
         }
@@ -166,7 +167,7 @@ const BookingModal = ({ onClose }) => {
                 icon: "success",
                 title: "Table booked!",
                 text: `Your table for ${guests} ${Number(guests) === 1 ? "guest" : "guests"} on ${date} at ${time} is confirmed.`,
-                confirmButtonText: "Great",
+                confirmButtonText: "OK",
                 confirmButtonColor: "#2f6b3f",
             });
         } catch (error) {

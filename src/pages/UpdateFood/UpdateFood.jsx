@@ -74,9 +74,9 @@ const UpdateFood = () => {
         if (user.email !== userEmail) {
             Swal.fire({
                 title: 'Invalid Authority',
-                text: 'You can only Edit food-items Added by You!',
+                text: 'You can only edit food-items added by you!',
                 icon: 'error',
-                confirmButtonText: 'understood'
+                confirmButtonText: 'OK'
             });
             return;
         }
@@ -99,7 +99,7 @@ const UpdateFood = () => {
                         title: 'Success!',
                         text: 'Food updated successfully',
                         icon: 'success',
-                        confirmButtonText: 'Cool'
+                        confirmButtonText: 'OK'
                     });
                     // form.reset();
                     navigate(`/my-foods/${user.email}`);

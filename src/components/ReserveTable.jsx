@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
     FaChevronDown,
@@ -44,6 +44,7 @@ const fieldClass =
 const ReserveTable = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     // guests defaults to "1", exactly like the booking modal
     const [form, setForm] = useState(INITIAL_FORM);
@@ -73,7 +74,7 @@ const ReserveTable = () => {
             cancelButtonText: "Not now",
             confirmButtonColor: "#2f6b3f",
         }).then((result) => {
-            if (result.isConfirmed) navigate("/signIn");
+            if (result.isConfirmed) navigate("/signIn", { state: { from: location } });
         });
     };
 
@@ -124,7 +125,7 @@ const ReserveTable = () => {
                 icon: "success",
                 title: "Table booked!",
                 text: `Your table for ${form.guests} ${Number(form.guests) === 1 ? "guest" : "guests"} on ${form.date} at ${form.time} is confirmed.`,
-                confirmButtonText: "Great",
+                confirmButtonText: "OK",
                 confirmButtonColor: "#2f6b3f",
             });
 

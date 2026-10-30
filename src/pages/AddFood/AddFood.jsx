@@ -67,7 +67,7 @@ const AddFood = () => {
                         title: "Success!",
                         text: "Food added successfully",
                         icon: "success",
-                        confirmButtonText: "Cool",
+                        confirmButtonText: "OK",
                     });
                     navigate("/all-foods");
                 }

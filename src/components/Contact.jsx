@@ -159,7 +159,7 @@ const Contact = () => {
                     title: "Message received!",
                     text: "Thanks for reaching out. We’ll get back to you within 24 hours.",
                     icon: "success",
-                    confirmButtonText: "Great",
+                    confirmButtonText: "OK",
                 });
                 setFormData(emptyForm);
             } else {

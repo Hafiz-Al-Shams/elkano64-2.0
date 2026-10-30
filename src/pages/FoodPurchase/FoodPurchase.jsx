@@ -78,31 +78,31 @@ const FoodPurchase = () => {
         if (user.email == food.userEmail) {
             Swal.fire({
                 title: "Forbidden Action",
-                text: "You can not Purchase food-items Added by You!",
+                text: "You can not purchase food-items added by you!",
                 icon: "error",
-                confirmButtonText: "understood",
+                confirmButtonText: "OK",
             });
             return;
         } else if (food.availableQuantity < 1) {
             Swal.fire({
-                title: "Food Not Available Today!",
+                title: "Food not available today!",
                 icon: "error",
-                confirmButtonText: "understood",
+                confirmButtonText: "OK",
             });
             return;
         } else if (numQuantity < 1 || isNaN(numQuantity)) {
             Swal.fire({
-                title: "invalid quantity!!!",
+                title: "Invalid quantity!!!",
                 icon: "error",
-                confirmButtonText: "try again",
+                confirmButtonText: "Try again",
             });
             return;
         } else if (numQuantity > food.availableQuantity) {
             Swal.fire({
                 title: "Sorry!! insufficient quantity!",
-                text: "You can not Purchase more than available quantity!",
+                text: "You can not purchase more than available quantity!",
                 icon: "error",
-                confirmButtonText: "understood",
+                confirmButtonText: "Try again",
             });
             return;
         }
@@ -123,8 +123,8 @@ const FoodPurchase = () => {
                     Swal.fire({
                         position: "center",
                         icon: "success",
-                        title: `You Ordered ${numQuantity} ${food.name} Successfully, cost: $${totalPrice}`,
-                        confirmButtonText: "cool",
+                        title: `You ordered ${numQuantity} ${food.name} successfully, cost: $${totalPrice}`,
+                        confirmButtonText: "OK",
                     });
                     navigate("/my-orders");
                 } else {
@@ -134,7 +134,7 @@ const FoodPurchase = () => {
                         title: "Order Failed",
                         text: data.message || "Something went wrong. Please try again.",
                         icon: "error",
-                        confirmButtonText: "understood",
+                        confirmButtonText: "Try again",
                     });
                 }
             })
@@ -144,7 +144,7 @@ const FoodPurchase = () => {
                     title: "Order Failed",
                     text: "Could not reach the server. Please try again.",
                     icon: "error",
-                    confirmButtonText: "understood",
+                    confirmButtonText: "Try again",
                 });
             });
     };

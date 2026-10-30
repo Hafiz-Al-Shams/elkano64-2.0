@@ -2,7 +2,7 @@ import { useContext } from "react";
 import SocialLogin from "../shared/SocialLogin";
 import AuthContext from "../../context/AuthContext/AuthContext";
 import Swal from "sweetalert2";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { FaArrowRight, FaBox, FaCalendarDays, FaRegEnvelope, FaRegImage, FaRegUser, FaUtensils } from "react-icons/fa6";
 import { MdOutlineLock } from "react-icons/md";
@@ -32,6 +32,7 @@ const Register = () => {
     const { createUser, updateUserProfile, signOutUser } = useContext(AuthContext);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
 
 
@@ -54,7 +55,7 @@ const Register = () => {
                 // title: 'Error!',
                 text: 'Password must be at least 6 characters long.',
                 icon: 'error',
-                confirmButtonText: 'Try Again'
+                confirmButtonText: 'Try again'
             });
             return;
         }
@@ -70,12 +71,13 @@ const Register = () => {
                                 // console.log('user signOut successful');
                                 Swal.fire({
                                     title: 'Registration Successful',
-                                    text: 'Now please Login to Continue',
+                                    text: 'Now please login to continue',
                                     icon: 'success',
-                                    confirmButtonText: 'ok'
+                                    confirmButtonText: 'OK'
                                 });
                                 e.target.reset();
-                                navigate('/signIn');
+                                // keep the page the visitor originally wanted, so login can send them there
+                                navigate('/signIn', { state: { from: location.state?.from } });
                             })
                             .catch(error => console.log('ERROR', error.message))
 
@@ -86,7 +88,7 @@ const Register = () => {
                         Swal.fire({
                             title: 'Error!',
                             icon: 'error',
-                            confirmButtonText: 'Try Again'
+                            confirmButtonText: 'Try again'
                         });
                     })
             })
@@ -154,7 +156,7 @@ const Register = () => {
 
                 <p className="mt-5 text-center text-sm text-base-content">
                     Already have an account?{" "}
-                    <Link to="/signIn" className="font-semibold text-primary underline underline-offset-2 hover:opacity-80">
+                    <Link to="/signIn" state={{ from: location.state?.from }} className="font-semibold text-primary underline underline-offset-2 hover:opacity-80">
                         Log in
                     </Link>
                 </p>

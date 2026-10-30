@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowRight, FaBell, FaBellConcierge, FaCalendarDays, FaRegEnvelope } from "react-icons/fa6";
 import { MdOutlineLock } from "react-icons/md";
 import AuthContext from "../../context/AuthContext/AuthContext";
@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import SocialLogin from "../shared/SocialLogin";
 import AuthLayout from "../../components/AuthLayout";
 import loginImage from "../../assets/login_image.webp";
+import { getRedirectPath } from "../../utils/authRedirect";
 
 const labelClass = "mb-1.5 block text-sm font-semibold text-base-content";
 const inputClass =
@@ -32,6 +33,7 @@ const SignIn = () => {
 
     const { signInUser } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSignIn = e => {
         e.preventDefault();
@@ -52,7 +54,8 @@ const SignIn = () => {
                     timer: 2000
                 });
                 e.target.reset();
-                navigate(`/my-orders`);
+                // go back to the page the visitor wanted before login (default: /my-orders)
+                navigate(getRedirectPath(location.state?.from), { replace: true });
             })
             .catch(error => {
                 console.log('ERROR from Firebase', error.message);
@@ -60,7 +63,7 @@ const SignIn = () => {
                     title: 'Error!',
                     text: 'Invalid Email or Password!!',
                     icon: 'error',
-                    confirmButtonText: 'Try Again'
+                    confirmButtonText: 'Try again'
                 });
                 // e.target.reset();
             })
@@ -110,7 +113,7 @@ const SignIn = () => {
 
                 <p className="mt-5 text-center text-sm text-base-content">
                     New to Elkano64?{" "}
-                    <Link to="/register" className="font-semibold text-primary underline underline-offset-2 hover:opacity-80">
+                    <Link to="/register" state={{ from: location.state?.from }} className="font-semibold text-primary underline underline-offset-2 hover:opacity-80">
                         Create an account
                     </Link>
                 </p>
